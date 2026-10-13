@@ -427,6 +427,18 @@ def find_order(
     return _call(wrapper, hw_tools.find_order, query)
 
 
+@function_tool
+def check_refund_eligibility(
+    wrapper: RunContextWrapper[AuthContext], order_id: int
+) -> dict[str, Any]:
+    """Explain whether an order can be refunded and why: days since delivery, the return
+    window that applies (platform default or store override), the deadline, the policy id
+    to cite, and whether the amount needs human approval. Use it before telling a user
+    whether a refund or return is possible, and cite the returned policy_id. If data_issue
+    is set, do not state a deadline; escalate to a human instead."""
+    return _call(wrapper, hw_tools.check_refund_eligibility, order_id)
+
+
 # Progressive disclosure: a session exposes only the tools its role can use.
 # Fewer tools mean fewer wrong choices and cleaner evals. At dev scale the
 # only difference is that support staff, who have no orders of their own,
@@ -439,6 +451,7 @@ _COMMON_TOOLS = [
     issue_refund,
     cancel_order,
     escalate_to_human,
+    check_refund_eligibility,
 ]
 TOOLS_BY_ROLE = {
     "shopper": _COMMON_TOOLS + [list_my_orders, find_order],
